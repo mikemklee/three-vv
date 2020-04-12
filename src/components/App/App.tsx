@@ -29,16 +29,22 @@ function App() {
   useEffect(() => {
     const createLabel = (
       target: THREE.Vector3,
-      position: THREE.Vector3,
-      label: string = ''
+      label: string = '',
+      small: boolean = false
     ) => {
       const labelDiv = document.createElement('div');
-      labelDiv.className = 'label';
       labelDiv.textContent = label || `[${target.toArray()}]`;
       labelDiv.style.marginTop = '-1em';
-      labelDiv.style.color = 'white';
+
+      if (small) {
+        labelDiv.style.color = '#888888';
+        labelDiv.style.fontSize = '12px';
+      } else {
+        labelDiv.style.color = 'white';
+      }
+
       const labelObj = new CSS2DObject(labelDiv);
-      labelObj.position.copy(position);
+      labelObj.position.copy(target);
       return labelObj;
     };
 
@@ -62,10 +68,10 @@ function App() {
       );
 
       // create label
-      const vectorLabel = createLabel(vector, vectorHelper.cone.position);
+      const vectorLabel = createLabel(vector);
+      sceneRef.current!.add(vectorLabel);
 
       const containerObj = new THREE.Object3D();
-      vectorHelper.add(vectorLabel);
       containerObj.add(vectorHelper);
       sceneRef.current!.add(containerObj);
 
@@ -89,21 +95,9 @@ function App() {
       const zAxis = new THREE.LineSegments(geometry, material);
 
       // add labels
-      const xAxisLabel = createLabel(
-        new THREE.Vector3(size / 2, 0, 0),
-        new THREE.Vector3(size / 2, 0, 0),
-        'X'
-      );
-      const yAxisLabel = createLabel(
-        new THREE.Vector3(0, -(size / 2), 0),
-        new THREE.Vector3(0, -(size / 2), 0),
-        'Y'
-      );
-      const zAxisLabel = createLabel(
-        new THREE.Vector3(0, 0, size / 2),
-        new THREE.Vector3(0, 0, size / 2),
-        'Z'
-      );
+      const xAxisLabel = createLabel(new THREE.Vector3(size / 2, 0, 0), 'X');
+      const yAxisLabel = createLabel(new THREE.Vector3(0, -(size / 2), 0), 'Y');
+      const zAxisLabel = createLabel(new THREE.Vector3(0, 0, size / 2), 'Z');
       const axesLabels = new THREE.Group();
       axesLabels.add(xAxisLabel, yAxisLabel, zAxisLabel);
 
