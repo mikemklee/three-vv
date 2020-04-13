@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import _ from 'lodash';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
@@ -11,10 +12,6 @@ import GithubLink from '../GithubLink/GithubLink';
 import ControlBoard from '../ControlBoard/ControlBoard';
 
 const Stats = require('stats.js');
-
-type VectorMap = {
-  [id: string]: THREE.Object3D;
-};
 
 function App() {
   const statsRef = useRef<any>(null);
@@ -30,7 +27,7 @@ function App() {
   const controlsRef = useRef<OrbitControls | null>(null);
 
   // state to hold list of vectors
-  const [vectors, setVectors] = useState<VectorMap>({});
+  const [vectors, setVectors] = useState<THREE.Object3D[]>([]);
 
   useEffect(() => {
     const createLabel = (
@@ -79,14 +76,13 @@ function App() {
 
       const containerObj = new THREE.Object3D();
       containerObj.add(vectorHelper);
+      containerObj.userData.target = vector;
+
       sceneRef.current!.add(containerObj);
 
       objectRef.current = containerObj as THREE.Object3D;
 
-      setVectors((vectors) => ({
-        ...vectors,
-        [containerObj.uuid]: containerObj,
-      }));
+      setVectors((vectors) => [...vectors, containerObj]);
     };
 
     const drawGrid = () => {
@@ -226,23 +222,21 @@ function App() {
     if (cameraRef.current) {
       const box = new THREE.Box3();
 
-      Object.values(vectors).forEach((vectorObj) =>
-        box.expandByObject(vectorObj)
-      );
+      _.forEach(vectors, (vectorObj) => box.expandByObject(vectorObj));
 
       cameraRef.current.zoom =
         Math.min(
           window.innerWidth / (box.max.x - box.min.x),
           window.innerHeight / (box.max.y - box.min.y)
-        ) * 0.4;
+        ) * 0.3;
       cameraRef.current.updateProjectionMatrix();
     }
   }, [vectors]);
 
   return (
     <StyledApp ref={observed}>
-      <GithubLink />
       <ControlBoard vectors={vectors} />
+      <GithubLink />
     </StyledApp>
   );
 }

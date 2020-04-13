@@ -1,23 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { StyledControlBoard } from './ControlBoard.styles';
 
-// import Button from '../Button/Button';
-
-// import Images from '../../assets/images';
+import VectorList from './VectorList/VectorList';
+import VectorForm from './VectorForm/VectorForm';
 
 type Props = {
-  vectors: {
-    [id: string]: THREE.Object3D;
-  };
+  vectors: THREE.Object3D[];
 };
 
-const ControlBoard = (props: Props) => {
-  console.log(props);
+export type SelectedVector = {
+  idx: number;
+  coords: { x: number; y: number; z: number };
+};
+
+const ControlBoard = ({ vectors }: Props) => {
+  const [selectedVector, setSelectedVector] = useState<SelectedVector | null>(
+    null
+  );
+
+  const handleSelectVector = (idx: number) => {
+    if (selectedVector && selectedVector.idx === idx) {
+      // de-select this item
+      setSelectedVector(null);
+    } else {
+      // select this item
+      const foundVector = vectors[idx];
+      setSelectedVector({ idx, coords: { ...foundVector.userData.target } });
+    }
+  };
+
   return (
     <StyledControlBoard>
-      <div>Vector lists</div>
-      <div>Selected vector</div>
+      <VectorList vectors={vectors} onSelectVector={handleSelectVector} />
+      <VectorForm selectedVector={selectedVector} />
     </StyledControlBoard>
   );
 };

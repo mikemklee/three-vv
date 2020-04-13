@@ -6,7 +6,7 @@ export const StyledControlBoard = styled.div`
   grid-gap: 0.3rem;
   padding: 0.2rem;
   align-items: center;
-  width: auto;
+  width: 15rem;
   height: auto;
   z-index: 1;
   position: absolute;
