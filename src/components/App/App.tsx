@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
@@ -8,10 +8,13 @@ import {
 
 import { StyledApp } from './App.styles';
 import GithubLink from '../GithubLink/GithubLink';
+import ControlBoard from '../ControlBoard/ControlBoard';
 
 const Stats = require('stats.js');
 
-export type TOOL = 'pick' | '';
+type VectorMap = {
+  [id: string]: THREE.Object3D;
+};
 
 function App() {
   const statsRef = useRef<any>(null);
@@ -25,6 +28,9 @@ function App() {
   const labelRendererRef = useRef<CSS2DRenderer | null>(null);
   const callbackRef = useRef<Function>(() => console.log('hi'));
   const controlsRef = useRef<OrbitControls | null>(null);
+
+  // state to hold list of vectors
+  const [vectors, setVectors] = useState<VectorMap>({});
 
   useEffect(() => {
     const createLabel = (
@@ -76,6 +82,11 @@ function App() {
       sceneRef.current!.add(containerObj);
 
       objectRef.current = containerObj as THREE.Object3D;
+
+      setVectors((vectors) => ({
+        ...vectors,
+        [containerObj.uuid]: containerObj,
+      }));
     };
 
     const drawGrid = () => {
@@ -105,17 +116,6 @@ function App() {
       gridGroup.add(gridHelper, zAxis, axesLabels);
 
       sceneRef.current!.add(gridGroup);
-    };
-
-    const zoomToFit = () => {
-      const box = new THREE.Box3().expandByObject(objectRef.current!);
-
-      cameraRef.current!.zoom =
-        Math.min(
-          window.innerWidth / (box.max.x - box.min.x),
-          window.innerHeight / (box.max.y - box.min.y)
-        ) * 0.4;
-      cameraRef.current!.updateProjectionMatrix();
     };
 
     const appElement = observed.current;
@@ -215,18 +215,34 @@ function App() {
 
       // add example vector helper
       drawVector(new THREE.Vector3(3, -4, 5));
-
-      // adjust camera zoom
-      zoomToFit();
     }
     return () => {
       // cleanup function
     };
   }, [observed]);
 
+  // zoom to fit
+  useEffect(() => {
+    if (cameraRef.current) {
+      const box = new THREE.Box3();
+
+      Object.values(vectors).forEach((vectorObj) =>
+        box.expandByObject(vectorObj)
+      );
+
+      cameraRef.current.zoom =
+        Math.min(
+          window.innerWidth / (box.max.x - box.min.x),
+          window.innerHeight / (box.max.y - box.min.y)
+        ) * 0.4;
+      cameraRef.current.updateProjectionMatrix();
+    }
+  }, [vectors]);
+
   return (
     <StyledApp ref={observed}>
       <GithubLink />
+      <ControlBoard vectors={vectors} />
     </StyledApp>
   );
 }
