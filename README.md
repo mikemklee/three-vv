@@ -1,11 +1,10 @@
-## Simple [**ViewCube**](https://www.autodeskresearch.com/publications/viewcube)
+## Simple 3D vector visualizer
 
-![example](src/assets/iamges/../images/three-viewcube.gif)
+![example](src/assets/iamges/../images/three-vv.gif)
 
-### Try it out [here](https://leemun1.github.io/three-viewcube)
+### Try it out [here](https://leemun1.github.io/three-vv)
 
 ### Built with:
 
 - React
 - Three.js
-- CSS 3D transforms
