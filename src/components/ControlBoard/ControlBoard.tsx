@@ -7,6 +7,7 @@ import VectorForm from './VectorForm/VectorForm';
 
 type Props = {
   vectors: THREE.Object3D[];
+  onSave: (idx: number | null, coords: SelectedVector['coords']) => void;
 };
 
 export type SelectedVector = {
@@ -14,7 +15,7 @@ export type SelectedVector = {
   coords: { x: number; y: number; z: number };
 };
 
-const ControlBoard = ({ vectors }: Props) => {
+const ControlBoard = ({ vectors, onSave }: Props) => {
   const [selectedVector, setSelectedVector] = useState<SelectedVector | null>(
     null
   );
@@ -30,10 +31,15 @@ const ControlBoard = ({ vectors }: Props) => {
     }
   };
 
+  const handleSave = (coords: SelectedVector['coords']) => {
+    const idx = selectedVector ? selectedVector.idx : null;
+    onSave(idx, coords);
+  };
+
   return (
     <StyledControlBoard>
       <VectorList vectors={vectors} onSelectVector={handleSelectVector} />
-      <VectorForm selectedVector={selectedVector} />
+      <VectorForm selectedVector={selectedVector} onSave={handleSave} />
     </StyledControlBoard>
   );
 };

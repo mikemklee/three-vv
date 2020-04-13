@@ -14,9 +14,10 @@ type Axes = 'x' | 'y' | 'z';
 
 type Props = {
   selectedVector: SelectedVector | null;
+  onSave: Function;
 };
 
-const VectorForm = ({ selectedVector }: Props) => {
+const VectorForm = ({ selectedVector, onSave }: Props) => {
   const [currentCoords, setCoords] = useState({ x: 1, y: 1, z: 1 });
 
   useEffect(() => {
@@ -33,8 +34,15 @@ const VectorForm = ({ selectedVector }: Props) => {
   ) => {
     setCoords({
       ...currentCoords,
-      [axis]: e.target.value,
+      [axis]: +e.target.value,
     });
+  };
+
+  const handleFormSave = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    onSave(currentCoords);
   };
 
   return (
@@ -52,7 +60,9 @@ const VectorForm = ({ selectedVector }: Props) => {
           />
         );
       })}
-      <FormButton>{selectedVector ? 'Update' : 'Draw'}</FormButton>
+      <FormButton onClick={(e) => handleFormSave(e)}>
+        {selectedVector ? 'Update' : 'Draw'}
+      </FormButton>
     </StyledVectorForm>
   );
 };

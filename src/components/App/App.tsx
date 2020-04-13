@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import _ from 'lodash';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -9,7 +9,7 @@ import {
 
 import { StyledApp } from './App.styles';
 import GithubLink from '../GithubLink/GithubLink';
-import ControlBoard from '../ControlBoard/ControlBoard';
+import ControlBoard, { SelectedVector } from '../ControlBoard/ControlBoard';
 
 const Stats = require('stats.js');
 
@@ -18,7 +18,6 @@ function App() {
 
   // General scene-related THREE refs
   const observed = useRef<HTMLDivElement>(null);
-  const objectRef = useRef<THREE.Object3D | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -29,29 +28,58 @@ function App() {
   // state to hold list of vectors
   const [vectors, setVectors] = useState<THREE.Object3D[]>([]);
 
-  useEffect(() => {
-    const createLabel = (
-      target: THREE.Vector3,
-      label: string = '',
-      small: boolean = false
-    ) => {
-      const labelDiv = document.createElement('div');
-      labelDiv.textContent = label || `[${target.toArray()}]`;
-      labelDiv.style.marginTop = '-1em';
+  const createLabel = (
+    target: THREE.Vector3,
+    label: string = '',
+    small: boolean = false
+  ) => {
+    const labelDiv = document.createElement('div');
+    labelDiv.textContent = label || `[${target.toArray()}]`;
+    labelDiv.style.marginTop = '-1em';
 
-      if (small) {
-        labelDiv.style.color = '#888888';
-        labelDiv.style.fontSize = '12px';
-      } else {
-        labelDiv.style.color = 'white';
-      }
+    if (small) {
+      labelDiv.style.color = '#888888';
+      labelDiv.style.fontSize = '12px';
+    } else {
+      labelDiv.style.color = 'white';
+    }
 
-      const labelObj = new CSS2DObject(labelDiv);
-      labelObj.position.copy(target);
-      return labelObj;
-    };
+    const labelObj = new CSS2DObject(labelDiv);
+    labelObj.position.copy(target);
+    return labelObj;
+  };
 
-    const drawVector = (vector: THREE.Vector3) => {
+  const drawGrid = useCallback(() => {
+    // create grid helper for XY plane
+    const size = 10;
+    const divisions = 10;
+    const gridHelper = new THREE.GridHelper(size, divisions, 0xffffff);
+    gridHelper.rotateX(Math.PI / 2);
+
+    // create helper for Z axis
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setFromPoints([
+      new THREE.Vector3(0, 0, 5),
+      new THREE.Vector3(0, 0, -5),
+    ]);
+    const zAxis = new THREE.LineSegments(geometry, material);
+
+    // add labels
+    const xAxisLabel = createLabel(new THREE.Vector3(size / 2, 0, 0), 'X');
+    const yAxisLabel = createLabel(new THREE.Vector3(0, -(size / 2), 0), 'Y');
+    const zAxisLabel = createLabel(new THREE.Vector3(0, 0, size / 2), 'Z');
+    const axesLabels = new THREE.Group();
+    axesLabels.add(xAxisLabel, yAxisLabel, zAxisLabel);
+
+    const gridGroup = new THREE.Group();
+    gridGroup.add(gridHelper, zAxis, axesLabels);
+
+    sceneRef.current!.add(gridGroup);
+  }, []);
+
+  const drawVector = useCallback(
+    (vector: THREE.Vector3, idx: number | null) => {
       // get length of vector
       const length = vector.length();
 
@@ -72,48 +100,34 @@ function App() {
 
       // create label
       const vectorLabel = createLabel(vector);
-      sceneRef.current!.add(vectorLabel);
 
-      const containerObj = new THREE.Object3D();
-      containerObj.add(vectorHelper);
-      containerObj.userData.target = vector;
+      const vectorContainer = new THREE.Group();
+      vectorContainer.userData.target = vector;
+      vectorContainer.attach(vectorHelper);
+      vectorContainer.attach(vectorLabel);
 
-      sceneRef.current!.add(containerObj);
+      sceneRef.current!.add(vectorContainer);
 
-      objectRef.current = containerObj as THREE.Object3D;
+      setVectors((vectors) => {
+        let existingVectors = vectors;
 
-      setVectors((vectors) => [...vectors, containerObj]);
-    };
+        if (idx !== null) {
+          // remove target vector first
+          const targetVector = existingVectors[idx];
+          targetVector.remove(...targetVector.children);
+          sceneRef.current!.remove(targetVector);
+          existingVectors = existingVectors.filter(
+            (_vector, index) => index !== idx
+          );
+        }
 
-    const drawGrid = () => {
-      // create grid helper for XY plane
-      const size = 10;
-      const divisions = 10;
-      const gridHelper = new THREE.GridHelper(size, divisions, 0xffffff);
-      gridHelper.rotateX(Math.PI / 2);
+        return [...existingVectors, vectorContainer];
+      });
+    },
+    []
+  );
 
-      // create helper for Z axis
-      const material = new THREE.LineBasicMaterial({ color: 0xffffff });
-      const geometry = new THREE.BufferGeometry();
-      geometry.setFromPoints([
-        new THREE.Vector3(0, 0, 5),
-        new THREE.Vector3(0, 0, -5),
-      ]);
-      const zAxis = new THREE.LineSegments(geometry, material);
-
-      // add labels
-      const xAxisLabel = createLabel(new THREE.Vector3(size / 2, 0, 0), 'X');
-      const yAxisLabel = createLabel(new THREE.Vector3(0, -(size / 2), 0), 'Y');
-      const zAxisLabel = createLabel(new THREE.Vector3(0, 0, size / 2), 'Z');
-      const axesLabels = new THREE.Group();
-      axesLabels.add(xAxisLabel, yAxisLabel, zAxisLabel);
-
-      const gridGroup = new THREE.Group();
-      gridGroup.add(gridHelper, zAxis, axesLabels);
-
-      sceneRef.current!.add(gridGroup);
-    };
-
+  useEffect(() => {
     const appElement = observed.current;
 
     if (appElement) {
@@ -210,12 +224,12 @@ function App() {
       drawGrid();
 
       // add example vector helper
-      drawVector(new THREE.Vector3(3, -4, 5));
+      drawVector(new THREE.Vector3(3, -4, 5), null);
     }
     return () => {
       // cleanup function
     };
-  }, [observed]);
+  }, [observed, drawGrid, drawVector]);
 
   // zoom to fit
   useEffect(() => {
@@ -233,9 +247,13 @@ function App() {
     }
   }, [vectors]);
 
+  const onSave = (idx: number | null, coords: SelectedVector['coords']) => {
+    drawVector(new THREE.Vector3(coords.x, coords.y, coords.z), idx);
+  };
+
   return (
     <StyledApp ref={observed}>
-      <ControlBoard vectors={vectors} />
+      <ControlBoard vectors={vectors} onSave={onSave} />
       <GithubLink />
     </StyledApp>
   );
