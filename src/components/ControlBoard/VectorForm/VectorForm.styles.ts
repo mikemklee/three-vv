@@ -2,26 +2,52 @@ import styled from 'styled-components';
 
 export const StyledVectorForm = styled.div`
   border-top: 0.1rem solid #424949;
-  padding: 0.5rem 0;
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  grid-gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const FormHeader = styled.div`
-  grid-column: span 3;
-  grid-row: 1 /2;
+  padding: 0.5rem;
 `;
 
-export const FormInput = styled.input`
+export const FormField = styled.div`
+  display: flex;
+  padding: 0 0.5rem;
+  margin: 0.25rem 0;
+  height: 2rem;
+  align-items: center;
+`;
+
+export const FieldLabel = styled.label`
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+`;
+
+export const FieldInput = styled.input`
   box-sizing: border-box;
   width: 100%;
-  grid-row: 2 / 3;
+  height: 100%;
+  outline: none;
+  border: none;
+  border-radius: 0.2rem;
+  margin: 0.25rem 0;
+  padding-left: 0.25rem;
 `;
 
 export const FormButton = styled.button`
-  grid-column: span 3;
-  grid-row: 3 / 4;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.2rem;
+  height: 2rem;
+  margin: 0.5rem;
+  color: white;
+  outline: none;
+  background: #008080;
+  opacity: 0.9;
+  transition: all 0.2s;
+
+  :hover {
+    opacity: 1;
+  }
 `;

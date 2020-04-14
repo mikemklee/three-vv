@@ -4,7 +4,9 @@ import _ from 'lodash';
 import {
   StyledVectorForm,
   FormHeader,
-  FormInput,
+  FormField,
+  FieldLabel,
+  FieldInput,
   FormButton,
 } from './VectorForm.styles';
 
@@ -52,12 +54,14 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
       </FormHeader>
       {_.map(['x', 'y', 'z'] as Axes[], (axis) => {
         return (
-          <FormInput
-            key={axis}
-            type='text'
-            value={currentCoords[axis]}
-            onChange={(e) => handleChange(e, axis)}
-          />
+          <FormField key={axis}>
+            <FieldLabel>{axis}</FieldLabel>
+            <FieldInput
+              type='text'
+              value={currentCoords[axis]}
+              onChange={(e) => handleChange(e, axis)}
+            />
+          </FormField>
         );
       })}
       <FormButton onClick={(e) => handleFormSave(e)}>
