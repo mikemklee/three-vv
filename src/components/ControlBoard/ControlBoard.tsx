@@ -38,7 +38,11 @@ const ControlBoard = ({ vectors, onSave }: Props) => {
 
   return (
     <StyledControlBoard>
-      <VectorList vectors={vectors} onSelectVector={handleSelectVector} />
+      <VectorList
+        vectors={vectors}
+        selectedVector={selectedVector}
+        onSelectVector={handleSelectVector}
+      />
       <VectorForm selectedVector={selectedVector} onSave={handleSave} />
     </StyledControlBoard>
   );

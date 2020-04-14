@@ -50,7 +50,7 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
   return (
     <StyledVectorForm>
       <FormHeader>
-        {selectedVector ? `Vector ${selectedVector.idx + 1}` : 'Add new vector'}
+        {selectedVector ? `Edit vector` : 'Add new vector'}
       </FormHeader>
       {_.map(['x', 'y', 'z'] as Axes[], (axis) => {
         return (

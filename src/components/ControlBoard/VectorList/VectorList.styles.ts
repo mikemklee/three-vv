@@ -13,7 +13,7 @@ export const ListHeader = styled.div`
   font-weight: 600;
 `;
 
-export const ListItem = styled.div`
+export const ListItem = styled.div<{ isCurrent: boolean }>`
   border-radius: 0.2rem;
   display: flex;
   align-items: center;
@@ -21,6 +21,7 @@ export const ListItem = styled.div`
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   transition: all 0.2s;
+  background: ${(props) => (props.isCurrent ? '#424949' : 'transparent')};
 
   :hover {
     background: #424949;
