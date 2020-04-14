@@ -251,9 +251,25 @@ function App() {
     drawVector(new THREE.Vector3(coords.x, coords.y, coords.z), idx);
   };
 
+  const onDelete = (idx: number) => {
+    setVectors((vectors) => {
+      let existingVectors = vectors;
+
+      // remove target vector
+      const targetVector = existingVectors[idx];
+      targetVector.remove(...targetVector.children);
+      sceneRef.current!.remove(targetVector);
+      existingVectors = existingVectors.filter(
+        (_vector, index) => index !== idx
+      );
+
+      return existingVectors;
+    });
+  };
+
   return (
     <StyledApp ref={observed}>
-      <ControlBoard vectors={vectors} onSave={onSave} />
+      <ControlBoard vectors={vectors} onSave={onSave} onDelete={onDelete} />
       <GithubLink />
     </StyledApp>
   );

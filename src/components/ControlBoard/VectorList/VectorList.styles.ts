@@ -21,6 +21,8 @@ export const ListItem = styled.div<{ isCurrent: boolean }>`
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   transition: all 0.2s;
+  user-select: none;
+  font-size: 0.9rem;
   background: ${(props) => (props.isCurrent ? '#424949' : 'transparent')};
 
   :hover {
