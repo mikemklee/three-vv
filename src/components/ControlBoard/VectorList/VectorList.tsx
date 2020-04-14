@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 
-import { StyledVectorList, ListHeader } from './VectorList.styles';
+import { StyledVectorList, ListHeader, ListItem } from './VectorList.styles';
 
 type Props = {
   vectors: THREE.Object3D[];
@@ -13,9 +13,9 @@ const VectorList = ({ vectors, onSelectVector }: Props) => {
     <StyledVectorList>
       <ListHeader>Vectors</ListHeader>
       {_.map(vectors, (_vector, id) => (
-        <div key={id} onClick={() => onSelectVector(id)}>
+        <ListItem key={id} onClick={() => onSelectVector(id)}>
           Vector {id + 1}
-        </div>
+        </ListItem>
       ))}
     </StyledVectorList>
   );

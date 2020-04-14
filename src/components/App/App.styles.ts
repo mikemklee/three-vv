@@ -11,4 +11,8 @@ export const StyledApp = styled.div`
     top: 0;
     left: 0;
   }
+
+  div {
+    box-sizing: border-box;
+  }
 `;

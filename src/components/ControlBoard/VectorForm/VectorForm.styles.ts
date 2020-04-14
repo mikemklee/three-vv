@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const StyledVectorForm = styled.div`
-  border-top: 0.1rem solid grey;
+  border-top: 0.1rem solid #424949;
   padding: 0.5rem 0;
   width: 100%;
   display: grid;
