@@ -33,6 +33,10 @@ const ControlBoard = ({ vectors, onSave, onDelete }: Props) => {
   };
 
   const handleDeleteVector = (idx: number) => {
+    if (selectedVector && selectedVector.idx === idx) {
+      // if currently selected, de-select first
+      setSelectedVector(null);
+    }
     onDelete(idx);
   };
 
