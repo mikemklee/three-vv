@@ -36,7 +36,7 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
   ) => {
     setCoords({
       ...currentCoords,
-      [axis]: +e.target.value,
+      [axis]: e.target.value,
     });
   };
 
@@ -44,6 +44,12 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.stopPropagation();
+
+    if (_.some(currentCoords, (value) => isNaN(value))) {
+      alert('Please enter a valid number');
+      return;
+    }
+
     onSave(currentCoords);
   };
 
