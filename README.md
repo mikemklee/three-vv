@@ -1,4 +1,4 @@
-## Simple 3D vector visualizer
+## 3VV- Simple 3D vector visualizer
 
 ![example](src/assets/iamges/../images/three-vv.gif)
 
