@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import _ from 'lodash';
 
 import {
@@ -6,12 +8,21 @@ import {
   FormHeader,
   FormField,
   FieldLabel,
+  FieldError,
   FieldInput,
   FormButton,
 } from './VectorForm.styles';
 
 import { SelectedVector } from '../ControlBoard';
 
+// form validation
+const validationSchema = Yup.object({
+  x: Yup.number().required('Required').typeError('Enter a valid number'),
+  y: Yup.number().required('Required').typeError('Enter a valid number'),
+  z: Yup.number().required('Required').typeError('Enter a valid number'),
+});
+
+// type definitions
 type Axes = 'x' | 'y' | 'z';
 
 type Props = {
@@ -19,39 +30,36 @@ type Props = {
   onSave: Function;
 };
 
+// component
 const VectorForm = ({ selectedVector, onSave }: Props) => {
-  const [currentCoords, setCoords] = useState({ x: 1, y: 1, z: 1 });
+  const {
+    handleSubmit,
+    handleChange,
+    values,
+    errors,
+    setFieldValue,
+  } = useFormik({
+    initialValues: {
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    validationSchema,
+    onSubmit: (values) => onSave(values),
+  });
 
+  // set input values on vector selection
   useEffect(() => {
     if (selectedVector) {
-      setCoords({ ...selectedVector.coords });
+      setFieldValue('x', selectedVector.coords.x);
+      setFieldValue('y', selectedVector.coords.y);
+      setFieldValue('z', selectedVector.coords.z);
     } else {
-      setCoords({ x: 1, y: 1, z: 1 });
+      setFieldValue('x', 1);
+      setFieldValue('y', 1);
+      setFieldValue('z', 1);
     }
-  }, [selectedVector]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    axis: string
-  ) => {
-    setCoords({
-      ...currentCoords,
-      [axis]: e.target.value,
-    });
-  };
-
-  const handleFormSave = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-
-    if (_.some(currentCoords, (value) => isNaN(value))) {
-      alert('Please enter a valid number');
-      return;
-    }
-
-    onSave(currentCoords);
-  };
+  }, [selectedVector, setFieldValue]);
 
   return (
     <StyledVectorForm>
@@ -63,14 +71,19 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
           <FormField key={axis}>
             <FieldLabel>{axis}</FieldLabel>
             <FieldInput
-              type='text'
-              value={currentCoords[axis]}
-              onChange={(e) => handleChange(e, axis)}
+              name={axis}
+              value={values[axis]}
+              onChange={handleChange}
             />
+            {errors[axis] && <FieldError>{errors[axis]}</FieldError>}
           </FormField>
         );
       })}
-      <FormButton onClick={(e) => handleFormSave(e)}>
+      <FormButton
+        type='submit'
+        disabled={!_.isEmpty(errors)}
+        onClick={() => handleSubmit()}
+      >
         {selectedVector ? 'Update' : 'Draw'}
       </FormButton>
     </StyledVectorForm>

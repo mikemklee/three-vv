@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const StyledVectorForm = styled.div`
   border-top: 0.1rem solid #424949;
@@ -9,22 +9,38 @@ export const StyledVectorForm = styled.div`
 
 export const FormHeader = styled.div`
   padding: 0.5rem;
+  font-weight: 600;
 `;
 
 export const FormField = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: repeat(2, 1fr);
   padding: 0 0.5rem;
   margin: 0.25rem 0;
-  height: 2rem;
   align-items: center;
+  height: 3.2rem;
 `;
 
 export const FieldLabel = styled.label`
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
   text-transform: uppercase;
   margin-right: 0.5rem;
 `;
 
+export const FieldError = styled.label`
+  color: #e74c3c;
+  grid-column: 1 / -1;
+  grid-row: 2 / -1;
+  font-size: 0.9rem;
+  align-self: end;
+  text-align: right;
+`;
+
 export const FieldInput = styled.input`
+  grid-column: 2 / -1;
+  grid-row: 1 / 2;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -35,7 +51,7 @@ export const FieldInput = styled.input`
   padding-left: 0.25rem;
 `;
 
-export const FormButton = styled.button`
+export const FormButton = styled.button<{ disabled: boolean }>`
   cursor: pointer;
   border: none;
   border-radius: 0.2rem;
@@ -50,4 +66,11 @@ export const FormButton = styled.button`
   :hover {
     opacity: 1;
   }
+
+  ${(props) =>
+    props.disabled &&
+    css`
+      pointer-events: none;
+      opacity: 0.2;
+    `}
 `;
