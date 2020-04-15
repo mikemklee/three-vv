@@ -208,6 +208,8 @@ function App() {
       gridRef.current.remove(...gridRef.current.children);
       sceneRef.current!.remove(gridRef.current);
     }
+
+    console.log('drawing new grid', gridSize);
     // create grid helper for XY plane
     const size = gridSize;
     const divisions = gridSize;
@@ -246,6 +248,7 @@ function App() {
       _.forEach(vectors, (vectorObj) => {
         combinedBox.union(new THREE.Box3().expandByObject(vectorObj));
         maxScalar = Math.max(
+          maxScalar,
           Math.abs(vectorObj.userData.target.x),
           Math.abs(vectorObj.userData.target.y),
           Math.abs(vectorObj.userData.target.z)
@@ -261,9 +264,10 @@ function App() {
       cameraRef.current.updateProjectionMatrix();
 
       // adjust grid size if needed (round up to nearest multiple of 4)
-      const targetGridSize = Math.ceil((maxScalar * 2) / 4.0) * 4.0;
-      if (isFinite(targetGridSize) && targetGridSize >= 12)
-        setGridSize(targetGridSize);
+      let targetGridSize = Math.ceil((maxScalar * 2) / 4.0) * 4.0;
+      // make sure grid size is at least 12
+      if (targetGridSize < 12) targetGridSize = 12;
+      if (isFinite(targetGridSize)) setGridSize(targetGridSize);
     }
   }, [vectors]);
 
