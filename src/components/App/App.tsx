@@ -24,9 +24,11 @@ function App() {
   const labelRendererRef = useRef<CSS2DRenderer | null>(null);
   const callbackRef = useRef<Function>(() => console.log('hi'));
   const controlsRef = useRef<OrbitControls | null>(null);
+  const gridRef = useRef<THREE.Group | null>(null);
 
   // state to hold list of vectors
   const [vectors, setVectors] = useState<THREE.Object3D[]>([]);
+  const [gridSize, setGridSize] = useState(12);
 
   const createLabel = (
     target: THREE.Vector3,
@@ -48,35 +50,6 @@ function App() {
     labelObj.position.copy(target);
     return labelObj;
   };
-
-  const drawGrid = useCallback(() => {
-    // create grid helper for XY plane
-    const size = 10;
-    const divisions = 10;
-    const gridHelper = new THREE.GridHelper(size, divisions, 0xffffff);
-    gridHelper.rotateX(Math.PI / 2);
-
-    // create helper for Z axis
-    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
-    const geometry = new THREE.BufferGeometry();
-    geometry.setFromPoints([
-      new THREE.Vector3(0, 0, 5),
-      new THREE.Vector3(0, 0, -5),
-    ]);
-    const zAxis = new THREE.LineSegments(geometry, material);
-
-    // add labels
-    const xAxisLabel = createLabel(new THREE.Vector3(size / 2, 0, 0), 'X');
-    const yAxisLabel = createLabel(new THREE.Vector3(0, -(size / 2), 0), 'Y');
-    const zAxisLabel = createLabel(new THREE.Vector3(0, 0, size / 2), 'Z');
-    const axesLabels = new THREE.Group();
-    axesLabels.add(xAxisLabel, yAxisLabel, zAxisLabel);
-
-    const gridGroup = new THREE.Group();
-    gridGroup.add(gridHelper, zAxis, axesLabels);
-
-    sceneRef.current!.add(gridGroup);
-  }, []);
 
   const drawVector = useCallback(
     (vector: THREE.Vector3, idx: number | null) => {
@@ -220,32 +193,77 @@ function App() {
       // trigger animation
       animate();
 
-      // draw grid
-      drawGrid();
-
       // add example vector helper
       drawVector(new THREE.Vector3(3, -4, 5), null);
     }
     return () => {
       // cleanup function
     };
-  }, [observed, drawGrid, drawVector]);
+  }, [observed, drawVector]);
+
+  // draw grid
+  useEffect(() => {
+    if (gridRef.current) {
+      // first delete existing grid
+      gridRef.current.remove(...gridRef.current.children);
+      sceneRef.current!.remove(gridRef.current);
+    }
+    // create grid helper for XY plane
+    const size = gridSize;
+    const divisions = gridSize;
+    const gridHelper = new THREE.GridHelper(size, divisions, 0xffffff);
+    gridHelper.rotateX(Math.PI / 2);
+
+    // create helper for Z axis
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setFromPoints([
+      new THREE.Vector3(0, 0, size / 2),
+      new THREE.Vector3(0, 0, -(size / 2)),
+    ]);
+    const zAxis = new THREE.LineSegments(geometry, material);
+
+    // add labels
+    const xAxisLabel = createLabel(new THREE.Vector3(size / 2, 0, 0), 'X');
+    const yAxisLabel = createLabel(new THREE.Vector3(0, -(size / 2), 0), 'Y');
+    const zAxisLabel = createLabel(new THREE.Vector3(0, 0, size / 2), 'Z');
+
+    const gridGroup = new THREE.Group();
+    gridGroup.add(gridHelper, zAxis, xAxisLabel, yAxisLabel, zAxisLabel);
+
+    sceneRef.current!.add(gridGroup);
+
+    gridRef.current = gridGroup;
+  }, [gridSize]);
 
   // zoom to fit
   useEffect(() => {
     if (cameraRef.current) {
       const combinedBox = new THREE.Box3();
 
+      // find maximum absolute scalar value of all vectors
+      let maxScalar = 0;
       _.forEach(vectors, (vectorObj) => {
         combinedBox.union(new THREE.Box3().expandByObject(vectorObj));
+        maxScalar = Math.max(
+          Math.abs(vectorObj.userData.target.x),
+          Math.abs(vectorObj.userData.target.y),
+          Math.abs(vectorObj.userData.target.z)
+        );
       });
 
+      // adjust camera zoom
       cameraRef.current.zoom =
         Math.min(
           window.innerWidth / (combinedBox.max.x - combinedBox.min.x),
           window.innerHeight / (combinedBox.max.y - combinedBox.min.y)
         ) * 0.3;
       cameraRef.current.updateProjectionMatrix();
+
+      // adjust grid size if needed (round up to nearest multiple of 4)
+      const targetGridSize = Math.ceil((maxScalar * 2) / 4.0) * 4.0;
+      if (isFinite(targetGridSize) && targetGridSize >= 12)
+        setGridSize(targetGridSize);
     }
   }, [vectors]);
 
