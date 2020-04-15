@@ -234,14 +234,16 @@ function App() {
   // zoom to fit
   useEffect(() => {
     if (cameraRef.current) {
-      const box = new THREE.Box3();
+      const combinedBox = new THREE.Box3();
 
-      _.forEach(vectors, (vectorObj) => box.expandByObject(vectorObj));
+      _.forEach(vectors, (vectorObj) => {
+        combinedBox.union(new THREE.Box3().expandByObject(vectorObj));
+      });
 
       cameraRef.current.zoom =
         Math.min(
-          window.innerWidth / (box.max.x - box.min.x),
-          window.innerHeight / (box.max.y - box.min.y)
+          window.innerWidth / (combinedBox.max.x - combinedBox.min.x),
+          window.innerHeight / (combinedBox.max.y - combinedBox.min.y)
         ) * 0.3;
       cameraRef.current.updateProjectionMatrix();
     }
