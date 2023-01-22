@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 
 import {
@@ -15,13 +13,6 @@ import {
 
 import { SelectedVector } from '../ControlBoard';
 
-// form validation
-const validationSchema = Yup.object({
-  x: Yup.number().required('Required').typeError('Enter a valid number'),
-  y: Yup.number().required('Required').typeError('Enter a valid number'),
-  z: Yup.number().required('Required').typeError('Enter a valid number'),
-});
-
 // type definitions
 type Axes = 'x' | 'y' | 'z';
 
@@ -32,39 +23,39 @@ type Props = {
 
 // component
 const VectorForm = ({ selectedVector, onSave }: Props) => {
-  const {
-    handleSubmit,
-    handleChange,
-    values,
-    errors,
-    setFieldValue,
-  } = useFormik({
-    initialValues: {
-      x: 1,
-      y: 1,
-      z: 1,
-    },
-    validationSchema,
-    onSubmit: (values) => onSave(values),
-  });
+  const [values, setValues] = useState({ x: 1, y: 1, z: 1 });
+  const [errors, setErrors] = useState({ x: null, y: null, z: null });
+
+  const handleChange = (e: any, axis: Axes) => {
+    e.persist()
+
+    // validate input
+    if (isNaN(e.target.value)) {
+      setErrors((errors) => ({ ...errors, [axis]: 'Please enter a valid number' }));
+    } else {
+      setValues((values) => ({ ...values, [axis]: e.target.value }));
+      setErrors((errors) => ({ ...errors, [axis]: null }));
+    }
+
+  };
+
+  const handleSubmit = () => {
+    onSave(values);
+  }
 
   // set input values on vector selection
   useEffect(() => {
     if (selectedVector) {
-      setFieldValue('x', selectedVector.coords.x);
-      setFieldValue('y', selectedVector.coords.y);
-      setFieldValue('z', selectedVector.coords.z);
+      setValues({ x: selectedVector.coords.x, y: selectedVector.coords.y, z: selectedVector.coords.z})
     } else {
-      setFieldValue('x', 1);
-      setFieldValue('y', 1);
-      setFieldValue('z', 1);
+      setValues({ x: 1, y: 1, z: 1 });
     }
-  }, [selectedVector, setFieldValue]);
+  }, [selectedVector, setValues]);
 
   return (
     <StyledVectorForm>
       <FormHeader>
-        {selectedVector ? `Edit vector` : 'Add new vector'}
+        Add new vector
       </FormHeader>
       {_.map(['x', 'y', 'z'] as Axes[], (axis) => {
         return (
@@ -73,7 +64,7 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
             <FieldInput
               name={axis}
               value={values[axis]}
-              onChange={handleChange}
+              onChange={(e) => handleChange(e, axis)}
             />
             {errors[axis] && <FieldError>{errors[axis]}</FieldError>}
           </FormField>
@@ -81,8 +72,8 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
       })}
       <FormButton
         type='submit'
-        disabled={!_.isEmpty(errors)}
-        onClick={() => handleSubmit()}
+        disabled={_.some(errors, item => item !== null)}
+        onClick={handleSubmit}
       >
         {selectedVector ? 'Update' : 'Draw'}
       </FormButton>
