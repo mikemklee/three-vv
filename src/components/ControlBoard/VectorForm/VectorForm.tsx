@@ -30,12 +30,9 @@ const VectorForm = ({ selectedVector, onSave }: Props) => {
     e.persist()
 
     // validate input
-    if (isNaN(e.target.value)) {
-      setErrors((errors) => ({ ...errors, [axis]: 'Please enter a valid number' }));
-    } else {
-      setValues((values) => ({ ...values, [axis]: e.target.value }));
-      setErrors((errors) => ({ ...errors, [axis]: null }));
-    }
+    const errorMessage =isNaN(e.target.value) ? 'Please enter a value' : null;
+    setValues((values) => ({ ...values, [axis]: e.target.value }));
+    setErrors((errors) => ({ ...errors, [axis]: errorMessage }));
 
   };
 
