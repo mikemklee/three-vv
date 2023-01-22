@@ -1,25 +1,13 @@
 {
   "files": {
-    "main.css": "/three-vv/static/css/main.878740f6.chunk.css",
-    "main.js": "/three-vv/static/js/main.b414c73a.chunk.js",
-    "main.js.map": "/three-vv/static/js/main.b414c73a.chunk.js.map",
-    "runtime-main.js": "/three-vv/static/js/runtime-main.c9a155fa.js",
-    "runtime-main.js.map": "/three-vv/static/js/runtime-main.c9a155fa.js.map",
-    "static/css/2.764ccc25.chunk.css": "/three-vv/static/css/2.764ccc25.chunk.css",
-    "static/js/2.1e12c7c2.chunk.js": "/three-vv/static/js/2.1e12c7c2.chunk.js",
-    "static/js/2.1e12c7c2.chunk.js.map": "/three-vv/static/js/2.1e12c7c2.chunk.js.map",
+    "main.css": "/three-vv/static/css/main.1e0821ca.css",
+    "main.js": "/three-vv/static/js/main.0bdf21da.js",
     "index.html": "/three-vv/index.html",
-    "precache-manifest.a6af71c67d31e567500d9af4283874ef.js": "/three-vv/precache-manifest.a6af71c67d31e567500d9af4283874ef.js",
-    "service-worker.js": "/three-vv/service-worker.js",
-    "static/css/2.764ccc25.chunk.css.map": "/three-vv/static/css/2.764ccc25.chunk.css.map",
-    "static/css/main.878740f6.chunk.css.map": "/three-vv/static/css/main.878740f6.chunk.css.map",
-    "static/js/2.1e12c7c2.chunk.js.LICENSE.txt": "/three-vv/static/js/2.1e12c7c2.chunk.js.LICENSE.txt"
+    "main.1e0821ca.css.map": "/three-vv/static/css/main.1e0821ca.css.map",
+    "main.0bdf21da.js.map": "/three-vv/static/js/main.0bdf21da.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.c9a155fa.js",
-    "static/css/2.764ccc25.chunk.css",
-    "static/js/2.1e12c7c2.chunk.js",
-    "static/css/main.878740f6.chunk.css",
-    "static/js/main.b414c73a.chunk.js"
+    "static/css/main.1e0821ca.css",
+    "static/js/main.0bdf21da.js"
   ]
 }
